@@ -38,7 +38,7 @@
 
 - (void) checkDevice
 {
-  BOOL jailbroken = [UIDevice currentDevice].isJB;
+  BOOL jailbroken = NO /*[UIDevice currentDevice].isJB;*/
   LNPasscodeStatus status = [UIDevice currentDevice].passcodeStatus;
 
   if (jailbroken || status == LNPasscodeStatusDisabled || status == LNPasscodeStatusUnknown) {
