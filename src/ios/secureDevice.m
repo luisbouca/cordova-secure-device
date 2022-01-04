@@ -64,7 +64,7 @@
       [self showAlert:alertMessage closeLabel:alertCloseButtonText];
     }); 
    } else if (status == LNPasscodeStatusUnknown) {
-     NSBundle *thisBundle = [NSBundle bundleWithPath: [[NSBundle mainBundle] pathForResource:NSStringFromClass([self class]) ofType: @"bundle"]];
+     /*NSBundle *thisBundle = [NSBundle bundleWithPath: [[NSBundle mainBundle] pathForResource:NSStringFromClass([self class]) ofType: @"bundle"]];
      NSString *alertMessage = [thisBundle localizedStringForKey:@"Validação Passcode Unknown." value:nil table:nil];
      NSString *alertCloseButtonText = [thisBundle localizedStringForKey:@"Close" value:nil table:nil];
     
@@ -73,7 +73,7 @@
        [self.webView removeFromSuperview];
        // Show Alert
        [self showAlert:alertMessage closeLabel:alertCloseButtonText];
-     }); 
+     }); */
     }
 }
 /*
