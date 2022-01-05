@@ -19,124 +19,24 @@
 #import <Cordova/CDV.h>
 #import <Cordova/CDVViewController.h>
 #import "secureDevice.h"
-#import "UIDevice+PasscodeStatus.h"
-#import "UIDevice+JBDetect.h"
+#import <LocalAuthentication/LocalAuthentication.h>
 
 @implementation secureDevice
 
-- (void)pluginInitialize
-{
-  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onResume:)
-                                               name:UIApplicationDidBecomeActiveNotification object:nil];
-  [self checkDevice];
+-(void) checkDeviceSecure:(CDVInvokedUrlCommand*) command{
+  LAContext *context = [LAContext new];
+  NSError *error;
+  BOOL passcodeEnabled = [context canEvaluatePolicy:LAPolicyDeviceOwnerAuthentication error:&error];
+  if (passcodeEnabled) {
+
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:TRUE];
+    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    // user has their passcode set
+  } else {
+
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:FALSE];
+    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    // users passcode is not set
+  }
 }
-
-- (void) onResume:(UIApplication *)application 
-{
-  [self checkDevice];
-}
-
-- (void) checkDevice
-{
-  BOOL jailbroken = NO; /*[UIDevice currentDevice].isJB;*/
-  LNPasscodeStatus status = [UIDevice currentDevice].passcodeStatus;
-
-  if (jailbroken) {
-    NSBundle *thisBundle = [NSBundle bundleWithPath: [[NSBundle mainBundle] pathForResource:NSStringFromClass([self class]) ofType: @"bundle"]];
-    NSString *alertMessage = [thisBundle localizedStringForKey:@"Validação de jailbroken." value:nil table:nil];
-    NSString *alertCloseButtonText = [thisBundle localizedStringForKey:@"Close" value:nil table:nil];
-    
-    dispatch_async( dispatch_get_main_queue(), ^ {
-      //Remove webView
-      [self.webView removeFromSuperview];
-      // Show Alert
-      [self showAlert:alertMessage closeLabel:alertCloseButtonText];
-    });   
-  } else if (status == LNPasscodeStatusDisabled) {
-    NSBundle *thisBundle = [NSBundle bundleWithPath: [[NSBundle mainBundle] pathForResource:NSStringFromClass([self class]) ofType: @"bundle"]];
-    NSString *alertMessage = [thisBundle localizedStringForKey:@"Validação Passcode Disabled." value:nil table:nil];
-    NSString *alertCloseButtonText = [thisBundle localizedStringForKey:@"Close" value:nil table:nil];
-    
-    dispatch_async( dispatch_get_main_queue(), ^ {
-      //Remove webView
-      [self.webView removeFromSuperview];
-      // Show Alert
-      [self showAlert:alertMessage closeLabel:alertCloseButtonText];
-    }); 
-   } else if (status == LNPasscodeStatusUnknown) {
-     /*NSBundle *thisBundle = [NSBundle bundleWithPath: [[NSBundle mainBundle] pathForResource:NSStringFromClass([self class]) ofType: @"bundle"]];
-     NSString *alertMessage = [thisBundle localizedStringForKey:@"Validação Passcode Unknown." value:nil table:nil];
-     NSString *alertCloseButtonText = [thisBundle localizedStringForKey:@"Close" value:nil table:nil];
-    
-     dispatch_async( dispatch_get_main_queue(), ^ {
-       //Remove webView
-       [self.webView removeFromSuperview];
-       // Show Alert
-       [self showAlert:alertMessage closeLabel:alertCloseButtonText];
-     }); */
-    }
-}
-/*
- * showAlert - Common method to instantiate the alert view for alert
- * Parameters:
- *  message       The alert view message.
- *  closeLabel    The label for the close button
- */
-- (void)showAlert:(NSString*)message closeLabel:(NSString*)closeLabel
-{
-    
-#ifdef __IPHONE_8_0
-    if (NSClassFromString(@"UIAlertController")) {
-        
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:message preferredStyle:UIAlertControllerStyleAlert];
-        
-        if ([[[UIDevice currentDevice] systemVersion] floatValue] < 8.3) {
-            
-            CGRect alertFrame = [UIScreen mainScreen].applicationFrame;
-            
-            if (UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation])) {
-                // swap the values for the app frame since it is now in landscape
-                CGFloat temp = alertFrame.size.width;
-                alertFrame.size.width = alertFrame.size.height;
-                alertFrame.size.height = temp;
-            }
-            
-            alertController.view.frame =  alertFrame;
-        }
-        
-        [alertController addAction:[UIAlertAction actionWithTitle:closeLabel
-                                                            style:UIAlertActionStyleDefault
-                                                          handler:^(UIAlertAction * action)
-        {
-           exit(0); 
-        }]];
-        
-        [self.viewController presentViewController:alertController animated:YES completion:nil];
-        
-    }
-    else
-    {
-#endif
-
-        UIAlertView* alertView = [[UIAlertView alloc]
-                                   initWithTitle:nil
-                                   message:message
-                                   delegate:self
-                                   cancelButtonTitle:nil
-                                   otherButtonTitles:nil];
-                        
-        [alertView addButtonWithTitle:closeLabel];
-                
-        [alertView show];
-#ifdef __IPHONE_8_0
-    }
-#endif
-    
-}
-
--(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{	
-	exit(0);
-}
-
 @end

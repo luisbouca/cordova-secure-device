@@ -16,8 +16,11 @@
 
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
+#import <Foundation/Foundation.h>
 
 
-@interface secureDevice : CDVPlugin <UIAlertViewDelegate>{}
+@interface secureDevice : CDVPlugin
+
+-(void) checkDeviceSecure:(CDVInvokedUrlCommand*) command;
 
 @end
